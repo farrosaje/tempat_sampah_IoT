@@ -1,0 +1,50 @@
+# tempat_sampah_IoT
+Membuat Tong Sampah Otomatis menggunakan sensor utrasonic dan Arduino uno
+#include <Servo.h>
+
+#define trigPin 8
+#define echoPin 9
+#define servoPin 6
+
+Servo myServo;
+
+long duration;
+int distance;
+int bukaSudut = 90;   // Sudut servo untuk posisi terbuka
+int tutupSudut = 0;   // Sudut servo untuk posisi tertutup
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  myServo.attach(servoPin);
+  myServo.write(tutupSudut); // Mulai dalam kondisi tertutup
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Kirim pulsa ultrasonik
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Baca waktu pantulan
+  duration = pulseIn(echoPin, HIGH);
+
+  // Hitung jarak (cm)
+  distance = duration * 0.034 / 2;
+
+  Serial.print("Jarak: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Jika objek (tangan) kurang dari 20 cm → buka tutup
+  if (distance <= 20) {
+    myServo.write(bukaSudut);
+    delay(8000); // tunggu 8 detik sebelum menutup kembali
+    myServo.write(tutupSudut);
+  }
+
+  delay(500); // jeda untuk pembacaan selanjutnya
+}
